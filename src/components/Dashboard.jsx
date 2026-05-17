@@ -44,6 +44,9 @@ export default function Dashboard() {
 
   const [loadingMy, setLoadingMy] = useState(false);
 
+  // State user data — reactive, update saat profile berhasil diedit
+  const [userData, setUserData] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
+
   const infraMapping = [
     { id: 1, name: 'Jalan & Jembatan', icon: '🛣️', color: 'text-blue-600' },
     { id: 2, name: 'Drainase', icon: '💧', color: 'text-teal-600' },
@@ -166,8 +169,11 @@ export default function Dashboard() {
     return <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase bg-slate-50 text-slate-600 border border-slate-200">❌ Ditolak</span>;
   };
 
-  // Ambil nama user dari localStorage untuk avatar
-  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  // Callback saat profile berhasil diupdate — update state langsung tanpa reload
+  const handleProfileUpdated = (updatedUser) => {
+    setUserData(updatedUser);
+  };
+
   const userInitials = userData?.name
     ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'U';
@@ -176,22 +182,55 @@ export default function Dashboard() {
     <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden text-slate-700">
 
       {/* SIDEBAR */}
-      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 space-y-8 flex-shrink-0">
-        <div onClick={() => navigate('/dashboard')} className="w-12 h-12 bg-teal-600 rounded-2xl flex items-center justify-center text-white shadow-md text-xl font-bold cursor-pointer">L</div>
-        <nav className="flex flex-col space-y-6 text-slate-300">
-          <button onClick={() => navigate('/dashboard')} className="text-teal-600 p-2 rounded-xl bg-teal-50/50">
+      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 flex-shrink-0">
+        {/* LOGO */}
+        <div onClick={() => navigate('/dashboard')} className="w-12 h-12 bg-teal-600 rounded-2xl flex items-center justify-center text-white shadow-md text-xl font-bold cursor-pointer mb-8">L</div>
+
+        {/* NAV ICONS */}
+        <nav className="flex flex-col space-y-6 text-slate-300 flex-1">
+          <button onClick={() => navigate('/dashboard')} className="text-teal-600 p-2 rounded-xl bg-teal-50/50" title="Dashboard">
             <i className="fa-solid fa-house text-lg"></i>
           </button>
-          <button className="hover:text-teal-600 p-2 transition-colors">
+          <button className="hover:text-teal-600 p-2 transition-colors" title="Pengaturan">
             <i className="fa-solid fa-gear text-lg"></i>
           </button>
         </nav>
-        <button
-          onClick={() => { localStorage.removeItem('token_admin'); navigate('/login'); }}
-          className="mt-auto text-slate-300 hover:text-red-500 p-2 transition-colors"
-        >
-          <i className="fa-solid fa-right-from-bracket text-lg"></i>
-        </button>
+
+        {/* PROFILE SECTION DI BAWAH SIDEBAR */}
+        <div className="flex flex-col items-center gap-2 mt-auto">
+          {/* Avatar — klik buka edit profile */}
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="relative group"
+            title="Edit Profil"
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-md overflow-hidden border-2 border-slate-100 group-hover:border-teal-400 transition-all">
+              {userData?.foto ? (
+                <img src={userData.foto} alt="Foto Profil" className="w-full h-full object-cover" />
+              ) : (
+                <span>{userInitials}</span>
+              )}
+            </div>
+            {/* Indikator edit */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center border border-slate-200 shadow-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              <i className="fa-solid fa-pen text-[8px] text-teal-600"></i>
+            </div>
+          </button>
+
+          {/* Nama user — truncate kalau panjang */}
+          <span className="text-[9px] font-bold text-slate-400 text-center leading-tight max-w-[64px] truncate px-1">
+            {userData?.name?.split(' ')[0] || 'User'}
+          </span>
+
+          {/* Tombol logout */}
+          <button
+            onClick={() => { localStorage.removeItem('token_admin'); localStorage.removeItem('user'); navigate('/login'); }}
+            className="text-slate-300 hover:text-red-500 p-2 transition-colors mt-1"
+            title="Keluar"
+          >
+            <i className="fa-solid fa-right-from-bracket text-lg"></i>
+          </button>
+        </div>
       </aside>
 
       {/* MAIN CONTENT */}
@@ -396,7 +435,6 @@ export default function Dashboard() {
                           <th className="py-4 px-4 w-24">Status</th>
                           <th className="py-4 px-4 w-44">Lokasi</th>
                           <th className="py-4 px-4 w-32">Tanggal</th>
-                          <th className="py-4 px-4 text-center w-24">Aksi</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -619,7 +657,7 @@ export default function Dashboard() {
 
       {/* MODALS */}
       <FormLaporan isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={handleRefresh} />
-      <ModalEditProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      <ModalEditProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} onProfileUpdated={handleProfileUpdated} />
     </div>
   );
 }
