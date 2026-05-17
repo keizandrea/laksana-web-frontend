@@ -61,8 +61,8 @@ function KlikPetaOtomatis({ koordinat, setKoordinat, setKota, setAlamat, setIsGe
 export default function FormLaporan({ isOpen, onClose, onRefresh }) {
     // --- STATE DATA FORMULIR ---
     const [judul, setJudul] = useState('');
-    const [jenisInfrastruktur, setJenisInfrastruktur] = useState('');
-    const [severity, setSeverity] = useState(3);
+    const [jenisInfrastruktur, setJenisInfrastruktur] = useState(null);
+    const [severity, setSeverity] = useState(null);
     const [kota, setKota] = useState('');
     const [alamat, setAlamat] = useState('');
     const [deskripsi, setDeskripsi] = useState('');
@@ -80,6 +80,23 @@ export default function FormLaporan({ isOpen, onClose, onRefresh }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const resetForm = () => {
+    setJudul('');
+    setJenisInfrastruktur(null);
+    setSeverity(null);
+    setKota('');
+    setAlamat('');
+    setDeskripsi('');
+    setNamaPelapor('');
+    setKontak('');
+    setEstimasiBiaya('0');
+    };
+
+    const handleClose = () => {
+    resetForm();
+    onClose();
+    };
 
     // --- EFFECT: TRIGGER AUTOCOMPLETE PAS USER NGETIK ALAMAT ---
     useEffect(() => {
@@ -196,7 +213,7 @@ const userId = userData?.id || 1;
                         <span className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Laporan Baru</span>
                         <h2 className="text-2xl font-bold text-slate-800 mt-1">Buat laporan baru</h2>
                     </div>
-                    <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl p-1">✕</button>
+                    <button type="button" onClick={handleClose} className="text-slate-400 hover:text-slate-600 text-xl p-1">✕</button>
                 </div>
 
                 {/* BODY FORMULIR */}
