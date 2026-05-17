@@ -174,6 +174,19 @@ export default function Dashboard() {
     setUserData(updatedUser);
   };
 
+  const handleLogout = async () => {
+  const token = localStorage.getItem('token_admin');
+  try {
+    await axios.post('http://127.0.0.1:8000/api/logout', {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (_) {
+  }
+  localStorage.removeItem('token_admin');
+  localStorage.removeItem('user');
+  navigate('/login');
+};
+
   const userInitials = userData?.name
     ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'U';
